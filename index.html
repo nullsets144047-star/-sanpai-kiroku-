@@ -20,11 +20,11 @@
 </head>
 <body>
   <div id="root"></div>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
-  <script type="text/babel" data-type="module">
-import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+  <script type="text/babel">
+const { useState, useEffect, useCallback, useRef, useMemo } = React;
 
 
 const LOGO = "data:image/webp;base64,UklGRkAFAABXRUJQVlA4IDQFAAAwFgCdASo8ADwAPpE0lkgloqIhM/5qqLASCWwAtGfCv7yE6n2dGgPKVbE9QH6A3hPmN86P0d/6r1D/7x1E3oAeW/7Iv9v/7fpAXcxip6A/dEgulzfB2nt2ngtpLJnvjo+sOBL6JrVmtxgIgkJP/kZH3sIvFHaG5znQnYgW89bGIK3jUT6rlQu08ZcJWhdWGG6/lkjOKLVKiWMPC6IiubQnpqe6hpw7sprxQWQXVOEofszusZeA1gjlDgAA/v9PiyuI/RzF0uOT6XaaEQXxP5KumPanKY39FBPX/73L/Irvz4lcf/h4PLX4KRQIPi1+d+XjNCbHnE0xKp+f3hjBLb4/9487+ShAVvf5vyG+79C7FBZlRKrUsYUlcGb/6HygAAQsmIQkZGK+i5uOV9ix4v8JV5oLGCDsxWT8+AhYy6uuOz1vqmO2F9sZBcVSkaBr21vYekWdDlvZqfzsvYe9iZav+wxnyPky0q2LeNZ4f/ULDE1eb8RPsn5XS7XPPg16/wdfrlPv8sufvPvMXmGUhLV9fJdhtKjmejw7VjL2luDA2jDRhuM9v3A1wx5cVDQLnXRl+BGZgRrBrkvNEwRGajILeWjqT8OiSQgVaXyqfzI0CChobzPcs8vTyCJEh2RYLtatvpkHqzZd8O+XBEz/vRncdJgQQEC3YGuDPr/KgWitv6DgWMw5hKolORgIjcGVht3qU0ubt4v5c68jzaml+/ybcErUXEDCQ7DKe5S7WOJtG3AQ/HGWRMkfcONTZ9yPCqOvPL7lOdMzVQDxF/dQXxL+hVgECd6dbzwRecWNzC1MODe/FafWerWQEq1iGiRjeVv/7Xr+24rL2wpBPFCVnf/wu2KNDP/PWUjUkvKukbb56fjI3ga1qUuqBpUvVCQXJjyPKjvBmRAhRIFy4x6sQDk/j5PRYPJzlhoDB0tgLzELrRMRoAt9TzPQm4BC8DbB/2HtfHeDfghVi53rzdmRPDfi5vv/DTfvwXyiEV623ekOh7rrCo95yXBSzCGHXip5UK31drJ3wExAaXKBMl0e3RTubKFhZnBz8ajiUfmw6QJgTXF7o0MnN1cHcQDYq7z/gnRV866OnHF91krkOKrgt+C99AQmcs1CWcddhKe3iDzgONs6QeM6xswBWFYHjK07sd8Xo1h8ZdpiYwNA76Pb47E41zQha9o8Uk1UDoNPM7u++oKaEHSclXQVUzc8nO7M6vK2XuSG5Q5Hk9cFDMBpe+WJzwe7ICI2Ijs/i5lKTTUXABzZInQCyt3dtiIdYnaI9nQurjcpbvmgSlkNZNjx5ZR7l+DyOIfL6LM0dGehnmpjC2+Iril0Mf9pUu0SfGr6KS+IRqebleq+bdoauTR0Hq1KDKp1zH/+Jf0K8fYZtMyY2XwTZUx191cJRZQqLVrsie0J3BA+fz4MdAu7y3Xm9H87ziYOOX/0OHQ5JkFC508OuvuDO6WGxDXyELJLxNr6pSSc9QhfjwEnIabBGj3PGMGCrjfMuaH71+tVZ70gFLFKFordSTAmVjIGMLiU3DxN2oHZnctDbt+4YjUM+02Y17U5DuHYbrW3W4j+PEioUcpkhBxwLHw8pqD1025v85nuD3Snln/Yivy8QaPZmF5vLwdf+VJuVcHVcn7x1bdN5bYKTUDkCXOz6KQb7p8JNKJbbRe76a1YKkVPeCNxLfX7wSXIR11K3mbFSKlx/sFRijjaGC3AmSU3hzRDblwvrgkx0Ys22UhuvME8uvpQrE9gBo9gOh6HGHsjyla3o7ND0GWSk6yAAAA=";
@@ -462,7 +462,6 @@ export default function App(){
     const root = ReactDOM.createRoot(document.getElementById('root'));
     root.render(React.createElement(App));
   </script>
-
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {

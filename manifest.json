@@ -1,0 +1,28 @@
+{
+  "name": "龍神経営 参拝記録",
+  "short_name": "龍神経営",
+  "description": "神社仏閣の参拝記録アプリ",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#FFF5FA",
+  "theme_color": "#831843",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-180.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

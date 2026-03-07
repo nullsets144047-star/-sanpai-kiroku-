@@ -287,7 +287,7 @@ const Home = ({data,onSel}) => {
 
   return(<div style={{padding:"0 0 16px"}}>
     {/* 開運日ヘッダー */}
-    <div style={{background:"linear-gradient(160deg,#0a0a1a 0%,#1a0533 35%,#2d0a4e 65%,#0d1a3a 100%)",paddingTop:"calc(env(safe-area-inset-top,0px) + 20px)",paddingBottom:"22px",paddingLeft:"20px",paddingRight:"20px",position:"relative",overflow:"hidden"}}>
+    <div style={{background:"linear-gradient(160deg,#0a0a1a 0%,#1a0533 35%,#2d0a4e 65%,#0d1a3a 100%)",paddingTop:"calc(env(safe-area-inset-top,0px) + 60px)",paddingBottom:"22px",paddingLeft:"20px",paddingRight:"20px",position:"relative",overflow:"hidden"}}>
       {/* 星空背景 */}
       <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 20% 50%,rgba(120,40,200,.15) 0%,transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(40,80,200,.12) 0%,transparent 50%),radial-gradient(ellipse at 60% 80%,rgba(200,40,120,.08) 0%,transparent 40%)"}}/>
       {/* 光の粒子 */}
@@ -319,7 +319,7 @@ const Home = ({data,onSel}) => {
           </div>
         </div>
       ) : (
-        <div style={{fontSize:14,color:"rgba(255,255,255,.5)",fontFamily:"'Zen Maru Gothic',sans-serif",marginBottom:12}}>今日はお参り日和 🙏</div>
+        <div style={{fontSize:16,color:"rgba(255,255,255,.9)",fontWeight:700,fontFamily:"'Zen Maru Gothic',sans-serif",marginBottom:12,textShadow:"0 1px 8px rgba(236,72,153,.6)"}}>✨ 今日はお参り日和 🙏</div>
       )}
       {/* 2週間カレンダー */}
       <div style={{marginLeft:-20,marginRight:-20}}>
@@ -684,7 +684,7 @@ export default function App(){
   return(<div style={{maxWidth:430,margin:"0 auto",minHeight:"100vh",background:"#FFF5FA",fontFamily:"'Zen Maru Gothic','Hiragino Sans',sans-serif",display:"flex",flexDirection:"column"}}>
     <style>{`@import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&display=swap');@keyframes fi{from{opacity:0}to{opacity:1}}@keyframes fsu{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}@keyframes su{from{transform:translateY(100%)}to{transform:translateY(0)}}@keyframes sp{from{transform:rotate(0)}to{transform:rotate(360deg)}}@keyframes ti{from{opacity:0;transform:translateX(-50%) translateY(-10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}@keyframes cf{0%{transform:translateY(0) translateX(0) rotate(0);opacity:1}100%{transform:translateY(-110vh) translateX(var(--dr)) rotate(360deg);opacity:0}}@keyframes cp{0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}100%{opacity:1;transform:translate(-50%,-50%) scale(1)}}@keyframes pl{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}input:focus,textarea:focus,select:focus{border-color:#EC4899 !important;outline:none;box-shadow:0 0 0 3px rgba(236,72,153,.12) !important}::-webkit-scrollbar{width:0;height:0}body{margin:0;background:#FFF5FA}`}</style>
     
-    <div style={{flex:1,overflowY:"auto",paddingBottom:85}}>
+    <div style={{flex:1,overflowY:"auto",paddingBottom:"calc(env(safe-area-inset-bottom,0px) + 85px)"}}>
       <div key={tab} style={{animation:"fsu .25s ease both"}}>
         {tab===0&&<Home data={data} onSel={sDi}/>}
         {tab===1&&<List data={data} onSel={sDi}/>}

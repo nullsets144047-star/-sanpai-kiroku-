@@ -279,6 +279,8 @@ const Home = ({data,onSel}) => {
   const shrines = data.filter(d=>d.category==="神社").length;
   const temples = data.filter(d=>d.category!=="神社").length;
   const prefs = new Set(data.map(d=>d.prefecture)).size;
+  const [showPrefList, setShowPrefList] = useState(false);
+  const [selPref, setSelPref] = useState(null);
   const recent = data.flatMap(d=>d.visits.map(v=>({...v,sh:d}))).sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,12);
   const lucky = useMemo(()=>getLuckyDay(new Date()),[]);
   const wd = ["日","月","火","水","木","金","土"];
@@ -359,13 +361,84 @@ const Home = ({data,onSel}) => {
         {l:"参拝回数",v:tv,e:"🙏",bg:"linear-gradient(135deg,#FCE7F3,#FBCFE8)",c:"#9D174D"},
         {l:"神社",v:shrines,e:"⛩",bg:"linear-gradient(135deg,#FEF3C7,#FDE68A)",c:"#92400E"},
         {l:"仏閣",v:temples,e:"🛕",bg:"linear-gradient(135deg,#EDE9FE,#DDD6FE)",c:"#5B21B6"},
-        {l:"都道府県",v:prefs,e:"🗾",bg:"linear-gradient(135deg,#D1FAE5,#A7F3D0)",c:"#065F46"},
+        {l:"都道府県",v:prefs,e:"🗾",bg:"linear-gradient(135deg,#D1FAE5,#A7F3D0)",c:"#065F46",fn:()=>setShowPrefList(true)},
       ].map((s,i)=>(
         <div key={i} onClick={s.fn} style={{cursor:s.fn?"pointer":"default",background:s.bg,borderRadius:18,padding:"14px 16px",display:"flex",alignItems:"center",gap:12,animation:`fsu .4s ease ${i*.08}s both`}}>
           <div style={{fontSize:26}}>{s.e}</div>
           <div><div style={{fontSize:24,fontWeight:900,color:s.c,fontFamily:"'Zen Maru Gothic',sans-serif",lineHeight:1}}>{s.v}</div><div style={{fontSize:10,fontWeight:600,color:s.c,opacity:.7,marginTop:2}}>{s.l}</div></div>
         </div>
       ))}
+    </div>
+
+    {/* 月別グラフ */}
+    <div style={{padding:"0 16px 12px"}}>
+      <div style={{background:"#FFFBFE",borderRadius:18,padding:"14px 16px",border:"1.5px solid #F3E8F0"}}>
+        <div style={{fontSize:15,fontWeight:800,color:"#4A1942",marginBottom:12,fontFamily:"'Zen Maru Gothic',sans-serif"}}>📊 月別参拝回数（全期間）</div>
+        {(()=>{
+          const allVisits = data.flatMap(d=>d.visits);
+          const now = new Date();
+          const nowY = now.getFullYear();
+          const nowM = now.getMonth()+1;
+          const dates = allVisits.map(v=>new Date(v.date)).filter(d=>!isNaN(d));
+          if(!dates.length) return null;
+          const minDate = new Date(Math.min(...dates));
+          const minY = minDate.getFullYear();
+          const minM = minDate.getMonth()+1;
+          const bars = [];
+          for(let y=minY;y<=nowY;y++){
+            const sm = y===minY?minM:1;
+            const em = y===nowY?nowM:12;
+            for(let m=sm;m<=em;m++){
+              const cnt = allVisits.filter(v=>{
+                const vd=new Date(v.date);
+                return vd.getFullYear()===y && vd.getMonth()+1===m;
+              }).length;
+              bars.push({y,m,cnt});
+            }
+          }
+          const max = Math.max(...bars.map(b=>b.cnt),1);
+          const barW = 28;
+          const gap = 4;
+          const totalW = bars.length*(barW+gap);
+          return(
+            <div ref={el=>{if(el)el.scrollLeft=el.scrollWidth;}}
+              style={{overflowX:"auto",WebkitOverflowScrolling:"touch",marginLeft:-4,marginRight:-4}}>
+              <div style={{minWidth:totalW,paddingLeft:4,paddingRight:4}}>
+                {/* 年ラベル行 */}
+                {(()=>{
+                  const years = [...new Set(bars.map(b=>b.y))];
+                  return(
+                    <div style={{display:"flex",marginBottom:4}}>
+                      {years.map(y=>{
+                        const count = bars.filter(b=>b.y===y).length;
+                        return(
+                          <div key={y} style={{width:count*(barW+gap)-gap,flexShrink:0,fontSize:11,fontWeight:800,color:"#4A1942",fontFamily:"'Zen Maru Gothic',sans-serif",borderLeft:"2px solid #E8D5E0",paddingLeft:4,marginRight:gap}}>
+                            {y}年
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
+                {/* バー＋月ラベル */}
+                <div style={{display:"flex",alignItems:"flex-end",gap:gap,height:90}}>
+                  {bars.map((b,i)=>{
+                    const h = Math.round((b.cnt/max)*68);
+                    const isNow = b.y===nowY && b.m===nowM;
+                    return(
+                      <div key={i} style={{width:barW,flexShrink:0,display:"flex",flexDirection:"column",alignItems:"center",gap:2}}>
+                        {b.cnt>0&&<div style={{fontSize:11,color:isNow?"#EC4899":"#9D6B8A",fontWeight:800}}>{b.cnt}</div>}
+                        <div style={{width:20,height:h||3,borderRadius:4,background:isNow?"linear-gradient(180deg,#EC4899,#F472B6)":b.cnt>0?"linear-gradient(180deg,#DDD6FE,#C4B5FD)":"#F3E8F0",minHeight:3}}/>
+                        <div style={{fontSize:10,color:isNow?"#EC4899":"#B388A8",fontWeight:isNow?800:500}}>{b.m}月</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          );
+        })()}
+      </div>
     </div>
 
     {/* Recent */}
@@ -384,8 +457,76 @@ const Home = ({data,onSel}) => {
         </div>
       ))}
     </div>
-  
+    {showPrefList&&<PrefListModal data={data} onClose={()=>setShowPrefList(false)} onSel={onSel}/>}
   </div>);
+};
+
+
+// === PREF LIST MODAL ===
+const PrefListModal = ({data, onClose, onSel}) => {
+  const PREFS_ALL = ["北海道","青森県","岩手県","宮城県","秋田県","山形県","福島県","茨城県","栃木県","群馬県","埼玉県","千葉県","東京都","神奈川県","新潟県","富山県","石川県","福井県","山梨県","長野県","岐阜県","静岡県","愛知県","三重県","滋賀県","京都府","大阪府","兵庫県","奈良県","和歌山県","鳥取県","島根県","岡山県","広島県","山口県","徳島県","香川県","愛媛県","高知県","福岡県","佐賀県","長崎県","熊本県","大分県","宮崎県","鹿児島県","沖縄県"];
+  const [selPref, setSelPref] = useState(null);
+  const visited = new Set(data.map(d=>d.prefecture));
+  const visitedPrefs = PREFS_ALL.filter(p=>visited.has(p));
+  const prefItems = selPref ? data.filter(d=>d.prefecture===selPref).sort((a,b)=>a.name.localeCompare(b.name,"ja")) : [];
+  return(
+    <div onClick={onClose} style={{position:"fixed",top:0,left:0,right:0,bottom:0,background:"rgba(0,0,0,.5)",zIndex:200,display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
+      <div onClick={e=>e.stopPropagation()} style={{width:"100%",maxWidth:430,background:"#FFFBFE",borderRadius:"20px 20px 0 0",maxHeight:"85vh",display:"flex",flexDirection:"column",paddingBottom:"env(safe-area-inset-bottom,16px)"}}>
+        {/* ヘッダー */}
+        <div style={{padding:"16px 20px 12px",borderBottom:"1.5px solid #F3E8F0",display:"flex",alignItems:"center",justifyContent:"space-between",flexShrink:0}}>
+          <div>
+            <div style={{fontSize:16,fontWeight:800,color:"#4A1942",fontFamily:"'Zen Maru Gothic',sans-serif"}}>
+              {selPref ? `🗾 ${selPref}` : "🗾 参拝済み都道府県"}
+            </div>
+            <div style={{fontSize:15,color:"#9D6B8A",marginTop:2,fontWeight:700}}>
+              {selPref ? `${prefItems.length}件` : `${visitedPrefs.length} / 47都道府県`}
+            </div>
+          </div>
+          <div style={{display:"flex",gap:8,alignItems:"center"}}>
+            {selPref && <button onClick={()=>setSelPref(null)} style={{padding:"6px 12px",borderRadius:12,border:"1.5px solid #E8D5E0",background:"#FFF5FA",fontSize:12,color:"#9D6B8A",cursor:"pointer",fontWeight:700,fontFamily:"'Zen Maru Gothic',sans-serif"}}>← 戻る</button>}
+            <button onClick={onClose} style={{width:30,height:30,borderRadius:10,border:"none",background:"#F3E8F0",color:"#9D6B8A",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700}}>✕</button>
+          </div>
+        </div>
+        {/* コンテンツ */}
+        <div style={{overflowY:"auto",flex:1,padding:"8px 16px 16px"}}>
+          {!selPref ? (
+            /* 都道府県一覧 */
+            <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8,paddingTop:8}}>
+              {visitedPrefs.map(p=>{
+                const cnt = data.filter(d=>d.prefecture===p).length;
+                return(
+                  <div key={p} onClick={()=>setSelPref(p)} style={{background:"linear-gradient(135deg,#D1FAE5,#A7F3D0)",borderRadius:14,padding:"12px 8px",textAlign:"center",cursor:"pointer",border:"1.5px solid #6EE7B7",transition:"transform .1s"}}
+                    onMouseEnter={e=>e.currentTarget.style.transform="scale(1.03)"}
+                    onMouseLeave={e=>e.currentTarget.style.transform="scale(1)"}>
+                    <div style={{fontSize:13,fontWeight:800,color:"#065F46",fontFamily:"'Zen Maru Gothic',sans-serif"}}>{p.replace(/[都道府県]$/,"")}</div>
+                    <div style={{fontSize:11,color:"#047857",marginTop:2}}>{cnt}件</div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            /* 神社仏閣一覧 */
+            <div style={{paddingTop:8}}>
+              {prefItems.map((it,i)=>(
+                <div key={it.id} style={{display:"flex",alignItems:"center",gap:12,padding:"12px 14px",marginBottom:8,background:"#FFFBFE",borderRadius:16,border:"1.5px solid #F3E8F0",cursor:"pointer",animation:`fsu .2s ease ${i*.03}s both`}}
+                  onClick={()=>{
+                    if(it.lat&&it.lng) window.open(`https://www.google.com/maps?q=${it.lat},${it.lng}`,"_blank");
+                    else window.open(`https://www.google.com/maps/search/${encodeURIComponent(selPref+" "+it.name)}`,"_blank");
+                  }}>
+                  <span style={{fontSize:22}}>{it.category==="神社"?"⛩":"🛕"}</span>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{fontSize:14,fontWeight:800,color:"#4A1942",fontFamily:"'Zen Maru Gothic',sans-serif",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{it.name}</div>
+                    <div style={{fontSize:11,color:"#9D6B8A",marginTop:2}}>{it.visits.length}回参拝 {it.lat?"📍":""}</div>
+                  </div>
+                  <span style={{fontSize:13,color:"#9D6B8A",fontWeight:700}}>地図 ›</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 };
 
 // === LIST ===
@@ -427,7 +568,7 @@ const List = ({data,onSel}) => {
 
 // === ADD/EDIT ===
 const Add = ({data,setData,ei,sEi,toast:st,goTab,onC}) => {
-  const em={name:"",category:"神社",prefecture:"",address:"",lat:"",lng:"",memo:"",photos:[],visits:[{id:G(),date:TD(),note:""}]};
+  const em={name:"",category:"神社",prefecture:"",address:"",lat:"",lng:"",memo:"",photos:[],visits:[{id:G(),date:TD(),note:"",weather:"",mood:""}]};
   const [f,sF]=useState(em);const [lo,sLo]=useState(false);const [ok,sOk]=useState(false);
   const [places,sPlaces]=useState([]);const [showPicker,sShowPicker]=useState(false);
   const [nQ,sNQ]=useState("");const [nF,sNF]=useState(false);
@@ -449,7 +590,7 @@ const Add = ({data,setData,ei,sEi,toast:st,goTab,onC}) => {
   const rmPhoto=(id)=>sF(prev=>({...prev,photos:prev.photos.filter(p=>p.id!==id)}));
   const nSug=useMemo(()=>{if(!nQ||nQ.length<1)return[];const q=nQ.toLowerCase();return data.filter(d=>d.name.toLowerCase().includes(q)).slice(0,8);},[nQ,data]);
   useEffect(()=>{if(ei){sF({name:ei.name,category:ei.category,prefecture:ei.prefecture,address:ei.address,lat:ei.lat||"",lng:ei.lng||"",memo:ei.memo||"",photos:ei.photos||[],visits:ei.visits.map(v=>({...v}))});sOk(false);sPlaces([]);}else{sF(em);sOk(false);sPlaces([]);}},[ei]);
-  const s=(k,v)=>sF(p=>({...p,[k]:v}));const aV=()=>sF(p=>({...p,visits:[...p.visits,{id:G(),date:TD(),note:""}]}));const rV=id=>sF(p=>({...p,visits:p.visits.filter(v=>v.id!==id)}));const uV=(id,k,v)=>sF(p=>({...p,visits:p.visits.map(x=>x.id===id?{...x,[k]:v}:x)}));
+  const s=(k,v)=>sF(p=>({...p,[k]:v}));const aV=()=>sF(p=>({...p,visits:[...p.visits,{id:G(),date:TD(),note:"",weather:"",mood:""}]}));const rV=id=>sF(p=>({...p,visits:p.visits.filter(v=>v.id!==id)}));const uV=(id,k,v)=>sF(p=>({...p,visits:p.visits.map(x=>x.id===id?{...x,[k]:v}:x)}));
 
   // GPS + Overpass API で周辺の神社仏閣を検索
   const gL=useCallback(()=>{
@@ -590,7 +731,16 @@ const Add = ({data,setData,ei,sEi,toast:st,goTab,onC}) => {
       <Fl l="📂 種別" ch={<div style={{display:"flex",gap:8}}>{[["神社","⛩"],["寺院","🛕"],["その他","🏛"]].map(([c,e])=><button key={c} onClick={()=>s("category",c)} style={{flex:1,padding:"10px",borderRadius:14,fontSize:14,fontWeight:700,border:f.category===c?"2px solid #EC4899":"2px solid #F3E8F0",background:f.category===c?"linear-gradient(135deg,#FCE7F3,#FBCFE8)":"#FFFBFE",color:f.category===c?"#9D174D":"#B388A8",cursor:"pointer",fontFamily:"'Zen Maru Gothic',sans-serif"}}>{e} {c}</button>)}</div>}/>
       <Fl l="🗾 都道府県" ch={<select value={f.prefecture} onChange={e=>s("prefecture",e.target.value)} style={{...inp,appearance:"auto"}}><option value="">選択してください</option>{PR.map(p=><option key={p} value={p}>{p}</option>)}</select>}/>
       <Fl l="📮 住所" ch={<input type="text" value={f.address} onChange={e=>s("address",e.target.value)} placeholder="住所" style={inp}/>}/>
-      <div style={{marginBottom:18}}><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}><span style={{fontSize:12,fontWeight:700,color:"#8B5E83",fontFamily:"'Zen Maru Gothic',sans-serif"}}>🗓 参拝記録 <span style={{color:"#EC4899",fontSize:14,fontWeight:900}}>({f.visits.length}回)</span></span><button onClick={aV} style={{padding:"5px 14px",borderRadius:12,border:"1.5px solid #F472B6",background:"#FCE7F3",color:"#BE185D",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"'Zen Maru Gothic',sans-serif"}}>+ 追加</button></div>{f.visits.map(v=><div key={v.id} style={{display:"flex",alignItems:"center",gap:8,marginBottom:8,padding:"10px 12px",background:"#FFF5FA",borderRadius:14,border:"1.5px solid #F3E8F0"}}><span>📅</span><input type="date" value={v.date} onChange={e=>uV(v.id,"date",e.target.value)} style={{...inp,flex:1,border:"none",background:"transparent",padding:"4px 6px",fontSize:14}}/>{f.visits.length>1&&<button onClick={()=>rV(v.id)} style={{width:30,height:30,borderRadius:10,border:"none",background:"#FEE2E2",color:"#DC2626",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,fontWeight:700}}>✕</button>}</div>)}</div>
+      <div style={{marginBottom:18}}><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}><span style={{fontSize:12,fontWeight:700,color:"#8B5E83",fontFamily:"'Zen Maru Gothic',sans-serif"}}>🗓 参拝記録 <span style={{color:"#EC4899",fontSize:14,fontWeight:900}}>({f.visits.length}回)</span></span><button onClick={aV} style={{padding:"5px 14px",borderRadius:12,border:"1.5px solid #F472B6",background:"#FCE7F3",color:"#BE185D",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"'Zen Maru Gothic',sans-serif"}}>+ 追加</button></div>{f.visits.map(v=><div key={v.id} style={{display:"flex",alignItems:"center",gap:8,marginBottom:8,padding:"10px 12px",background:"#FFF5FA",borderRadius:14,border:"1.5px solid #F3E8F0"}}><span>📅</span><input type="date" value={v.date} onChange={e=>uV(v.id,"date",e.target.value)} style={{...inp,flex:1,border:"none",background:"transparent",padding:"4px 6px",fontSize:14}}/><div style={{display:"flex",gap:4,flexShrink:0}}>
+              {["☀️","🌤","☁️","🌧","❄️"].map(w=>(
+                <button key={w} onClick={()=>uV(v.id,"weather",v.weather===w?"":w)}
+                  style={{width:28,height:28,borderRadius:8,border:v.weather===w?"2px solid #EC4899":"1.5px solid #F3E8F0",background:v.weather===w?"#FCE7F3":"#FFFBFE",fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",padding:0}}>
+                  {w}
+                </button>
+              ))}
+            </div>
+
+            {f.visits.length>1&&<button onClick={()=>rV(v.id)} style={{width:30,height:30,borderRadius:10,border:"none",background:"#FEE2E2",color:"#DC2626",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,fontWeight:700}}>✕</button>}</div>)}</div>
       {(f.lat||f.name)&&<button onClick={()=>{if(f.lat&&f.lng)window.open(`https://www.google.com/maps?q=${f.lat},${f.lng}`,"_blank");else if(f.name)window.open(`https://www.google.com/maps/search/${encodeURIComponent((f.prefecture?f.prefecture+' ':'')+f.name)}`,"_blank");}} style={{width:"100%",padding:"12px",borderRadius:14,border:"1.5px solid #F3E8F0",background:"#FFFBFE",color:"#9D6B8A",fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:"'Zen Maru Gothic',sans-serif",display:"flex",alignItems:"center",justifyContent:"center",gap:8,marginBottom:18}}>🗺 Google Mapsで確認</button>}
       <Fl l="📝 メモ" ch={<textarea value={f.memo} onChange={e=>s("memo",e.target.value)} placeholder="感想やメモ..." rows={3} style={{...inp,resize:"vertical",fontFamily:"'Zen Maru Gothic',sans-serif"}}/>}/>
       <div style={{marginBottom:18}}>
@@ -661,7 +811,7 @@ const Det = ({item:it,open,onClose,onEdit}) => {
         </div>
       </div>
     )}
-    <div style={{marginBottom:18}}><div style={{fontSize:13,fontWeight:800,color:"#4A1942",marginBottom:10,fontFamily:"'Zen Maru Gothic',sans-serif"}}>🗓 参拝記録（{it.visits.length}回）</div>{[...it.visits].sort((a,b)=>new Date(b.date)-new Date(a.date)).map(v=><div key={v.id} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 14px",background:"#FFF5FA",borderRadius:12,marginBottom:6}}><span>📅</span><span style={{fontSize:14,fontWeight:700,color:"#4A1942",fontFamily:"'Zen Maru Gothic',sans-serif"}}>{FD(v.date)}</span></div>)}</div>
+    <div style={{marginBottom:18}}><div style={{fontSize:13,fontWeight:800,color:"#4A1942",marginBottom:10,fontFamily:"'Zen Maru Gothic',sans-serif"}}>🗓 参拝記録（{it.visits.length}回）</div>{[...it.visits].sort((a,b)=>new Date(b.date)-new Date(a.date)).map(v=><div key={v.id} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 14px",background:"#FFF5FA",borderRadius:12,marginBottom:6}}><span>📅</span><span style={{fontSize:14,fontWeight:700,color:"#4A1942",fontFamily:"'Zen Maru Gothic',sans-serif"}}>{FD(v.date)}</span>{v.weather&&<span style={{fontSize:16,marginLeft:6}}>{v.weather}</span>}</div>)}</div>
     <div style={{display:"flex",gap:10}}><button onClick={()=>{if(it.lat&&it.lng)window.open(`https://www.google.com/maps?q=${it.lat},${it.lng}`,"_blank");else window.open(`https://www.google.com/maps/search/${encodeURIComponent((it.prefecture?it.prefecture+' ':'')+it.name)}`,"_blank");}} style={{flex:1,padding:"13px",borderRadius:14,border:"1.5px solid #F3E8F0",background:"#FFFBFE",color:"#9D6B8A",fontSize:14,fontWeight:700,cursor:"pointer",fontFamily:"'Zen Maru Gothic',sans-serif",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>🗺 地図</button><button onClick={onEdit} style={{flex:1,padding:"13px",borderRadius:14,border:"none",background:"linear-gradient(135deg,#EC4899,#F472B6)",color:"#fff",fontSize:14,fontWeight:700,cursor:"pointer",fontFamily:"'Zen Maru Gothic',sans-serif",display:"flex",alignItems:"center",justifyContent:"center",gap:6,boxShadow:"0 4px 16px rgba(236,72,153,.25)"}}>✏️ 編集</button></div>
   </>}/>);
 };

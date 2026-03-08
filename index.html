@@ -287,7 +287,7 @@ const Home = ({data,onSel}) => {
   const now = new Date();
   const dateStr = `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日（${wd[now.getDay()]}）`;
 
-  return(<div style={{padding:"0 0 16px",paddingTop:"env(safe-area-inset-top,22px)"}}>
+  return(<div style={{padding:"0 0 16px",paddingTop:"env(safe-area-inset-top,11px)"}}>
     {/* 開運日ヘッダー */}
     <div style={{background:"linear-gradient(160deg,#0a0a1a 0%,#1a0533 35%,#2d0a4e 65%,#0d1a3a 100%)",paddingTop:20,paddingBottom:"22px",paddingLeft:"20px",paddingRight:"20px",position:"relative",overflow:"hidden"}}>
       {/* 星空背景 */}
@@ -533,7 +533,7 @@ const PrefListModal = ({data, onClose, onSel}) => {
 const List = ({data,onSel}) => {
   const [q,sQ]=useState(""); const [cat,sC]=useState("all"); const [so,sO]=useState("recent");
   const ls = useMemo(()=>{let d=[...data];if(cat==="s")d=d.filter(x=>x.category==="神社");if(cat==="t")d=d.filter(x=>x.category!=="神社");if(q){const s=q.toLowerCase();d=d.filter(x=>x.name.toLowerCase().includes(s)||x.prefecture.includes(s));}if(so==="recent")d.sort((a,b)=>{const am=a.visits.length?Math.max(...a.visits.map(v=>+new Date(v.date))):0;const bm=b.visits.length?Math.max(...b.visits.map(v=>+new Date(v.date))):0;return bm-am;});else if(so==="count")d.sort((a,b)=>b.visits.length-a.visits.length);else d.sort((a,b)=>a.name.localeCompare(b.name,"ja"));return d;},[data,q,cat,so]);
-  return(<div style={{padding:"0 0 16px",paddingTop:"env(safe-area-inset-top,22px)"}}>
+  return(<div style={{padding:"0 0 16px",paddingTop:"env(safe-area-inset-top,11px)"}}>
     <div style={{padding:"14px 16px 8px",position:"sticky",top:0,background:"#FFF5FA",zIndex:10}}>
       <div style={{position:"relative"}}><span style={{position:"absolute",left:14,top:"50%",transform:"translateY(-50%)",fontSize:16}}>🔍</span><input type="text" placeholder="神社名・地名で検索..." value={q} onChange={e=>sQ(e.target.value)} style={{...inp,paddingLeft:42,border:"2px solid #F3E8F0"}}/></div>
       <div style={{display:"flex",gap:8,marginTop:10,flexWrap:"wrap"}}>
@@ -679,7 +679,7 @@ const Add = ({data,setData,ei,sEi,toast:st,goTab,onC}) => {
 
   const sv=()=>{if(!f.name.trim()){st("名称を入力","error");return;}if(!f.visits.length||!f.visits[0].date){st("参拝日を入力","error");return;}if(ei){setData(d=>d.map(x=>x.id===ei.id?{...x,...f}:x));st("更新しました ✏️","success");sEi(null);}else{setData(d=>[...d,{id:G(),...f,lat:f.lat?parseFloat(f.lat):null,lng:f.lng?parseFloat(f.lng):null,createdAt:TD()}]);onC();}sF(em);sOk(false);sPlaces([]);goTab(1);};
   const dl=()=>{if(ei&&window.confirm(`「${ei.name}」を削除？`)){setData(d=>d.filter(x=>x.id!==ei.id));sEi(null);sF(em);st("削除しました","success");goTab(1);}};
-  return(<div style={{padding:"16px",paddingTop:"env(safe-area-inset-top,22px)"}}>
+  return(<div style={{padding:"16px",paddingTop:"env(safe-area-inset-top,11px)"}}>
     <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16}}><h3 style={{margin:0,fontSize:18,fontWeight:800,color:"#4A1942",fontFamily:"'Zen Maru Gothic',sans-serif"}}>{ei?"✏️ 編集":"🙏 新しいお参り"}</h3>{ei&&<button onClick={()=>{sEi(null);sF(em);}} style={{padding:"6px 14px",borderRadius:12,border:"1.5px solid #E8D5E0",background:"#FFF5FA",fontSize:12,color:"#9D6B8A",cursor:"pointer",fontWeight:700,fontFamily:"'Zen Maru Gothic',sans-serif"}}>新規</button>}</div>
 
     {/* GPS Button */}
@@ -781,7 +781,7 @@ const Cfg = ({data,setData,toast:st}) => {
   const ex=()=>{const B="\uFEFF",h="ID,名称,種別,都道府県,住所,緯度,経度,参拝日,参拝回数,メモ,登録日時";const rs=data.map(d=>{const ds=d.visits.map(v=>v.date).join("；");const e=s=>`"${(s||"").replace(/"/g,'""')}"`;return[d.id,e(d.name),d.category,d.prefecture,e(d.address),d.lat||"",d.lng||"",e(ds),d.visits.length,e(d.memo),d.createdAt].join(",");});const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([B+h+"\n"+rs.join("\n")],{type:"text/csv;charset=utf-8;"}));a.download=`参拝記録_${TD()}.csv`;a.click();st("📄 エクスポート完了！","success");};
   const im=e=>{const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=ev=>{try{const ls=ev.target.result.split("\n").filter(l=>l.trim());if(ls.length<2){st("データなし","error");return;}const imp=[];let sk=0;for(let i=1;i<ls.length;i++){const cs=ls[i].match(/(".*?"|[^,]*)/g)?.map(s=>s.replace(/^"|"$/g,"").replace(/""/g,'"'))||[];if(!cs[1]){sk++;continue;}const ds=(cs[7]||"").split(/[；;,]/).filter(d=>d.trim());if(!ds.length){sk++;continue;}if(data.find(d=>d.name===cs[1]))continue;imp.push({id:G(),name:cs[1],category:cs[2]||"神社",prefecture:cs[3]||"",address:cs[4]||"",lat:cs[5]?parseFloat(cs[5]):null,lng:cs[6]?parseFloat(cs[6]):null,memo:cs[9]||"",visits:ds.map(dt=>({id:G(),date:dt.trim(),note:""})),createdAt:cs[10]||TD()});}setData(d=>[...d,...imp]);st(`${imp.length}件インポート ✨`,"success");}catch{st("読み込み失敗","error");}};r.readAsText(file);e.target.value="";};
   const Bt=({onClick:oc,icon:ic,label:lb,sub:sb,bg,color:cl,disabled:di})=><button onClick={oc} disabled={di} style={{width:"100%",padding:"14px 18px",borderRadius:16,border:"none",background:di?"#E8D5E0":bg,color:di?"#B388A8":cl,fontSize:14,fontWeight:700,cursor:di?"default":"pointer",fontFamily:"'Zen Maru Gothic',sans-serif",textAlign:"left",display:"flex",alignItems:"center",gap:14,marginBottom:10,opacity:di?.6:1}}><span style={{fontSize:24}}>{ic}</span><div><div>{lb}</div><div style={{fontSize:11,opacity:.7,fontWeight:500,marginTop:2}}>{sb}</div></div></button>;
-  return(<div style={{padding:"16px",paddingTop:"env(safe-area-inset-top,22px)"}}>
+  return(<div style={{padding:"16px",paddingTop:"env(safe-area-inset-top,11px)"}}>
     <h3 style={{margin:"0 0 18px",fontSize:18,fontWeight:800,color:"#4A1942",fontFamily:"'Zen Maru Gothic',sans-serif"}}>⚙️ 設定</h3>
     <div style={{background:"#FFFBFE",borderRadius:22,padding:"20px",border:"1.5px solid #F3E8F0",marginBottom:16}}>
       <Bt onClick={ex} icon="📤" label="エクスポート" sub={`CSV出力（${data.length}件）`} bg="linear-gradient(135deg,#DBEAFE,#BFDBFE)" color="#1E40AF" disabled={data.length===0}/>
@@ -832,9 +832,9 @@ export default function App(){
 
   const tabs=[{i:"🏠",a:"🏡",l:"ホーム"},{i:"📋",a:"📋",l:"リスト"},{i:"➕",a:"➕",l:"追加"},{i:"⚙️",a:"⚙️",l:"設定"}];
   return(<div id="app-root" style={{maxWidth:430,margin:"0 auto",minHeight:"100vh",background:"#FFF5FA",fontFamily:"'Zen Maru Gothic','Hiragino Sans',sans-serif",display:"flex",flexDirection:"column"}}>
-    <style>{`@import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&display=swap');#app-root{padding-top:env(safe-area-inset-top,44px);}@keyframes fi{from{opacity:0}to{opacity:1}}@keyframes fsu{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}@keyframes su{from{transform:translateY(100%)}to{transform:translateY(0)}}@keyframes sp{from{transform:rotate(0)}to{transform:rotate(360deg)}}@keyframes ti{from{opacity:0;transform:translateX(-50%) translateY(-10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}@keyframes cf{0%{transform:translateY(0) translateX(0) rotate(0);opacity:1}100%{transform:translateY(-110vh) translateX(var(--dr)) rotate(360deg);opacity:0}}@keyframes cp{0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}100%{opacity:1;transform:translate(-50%,-50%) scale(1)}}@keyframes pl{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}input:focus,textarea:focus,select:focus{border-color:#EC4899 !important;outline:none;box-shadow:0 0 0 3px rgba(236,72,153,.12) !important}::-webkit-scrollbar{width:0;height:0}body{margin:0;background:#FFF5FA;padding-top:env(safe-area-inset-top,0px);padding-top:constant(safe-area-inset-top,0px);}#app-root{box-sizing:border-box;}`}</style>
+    <style>{`@import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&display=swap');#app-root{padding-top:env(safe-area-inset-top,22px);}@keyframes fi{from{opacity:0}to{opacity:1}}@keyframes fsu{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}@keyframes su{from{transform:translateY(100%)}to{transform:translateY(0)}}@keyframes sp{from{transform:rotate(0)}to{transform:rotate(360deg)}}@keyframes ti{from{opacity:0;transform:translateX(-50%) translateY(-10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}@keyframes cf{0%{transform:translateY(0) translateX(0) rotate(0);opacity:1}100%{transform:translateY(-110vh) translateX(var(--dr)) rotate(360deg);opacity:0}}@keyframes cp{0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}100%{opacity:1;transform:translate(-50%,-50%) scale(1)}}@keyframes pl{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}input:focus,textarea:focus,select:focus{border-color:#EC4899 !important;outline:none;box-shadow:0 0 0 3px rgba(236,72,153,.12) !important}::-webkit-scrollbar{width:0;height:0}body{margin:0;background:#FFF5FA;padding-top:env(safe-area-inset-top,0px);padding-top:constant(safe-area-inset-top,0px);}#app-root{box-sizing:border-box;}`}</style>
     
-    <div style={{flex:1,overflowY:"auto",paddingBottom:"calc(env(safe-area-inset-bottom,0px) + 85px)"}}>
+    <div ref={el=>{if(el&&tab!==0)el.scrollTop=0;}} style={{flex:1,overflowY:"auto",paddingBottom:"calc(env(safe-area-inset-bottom,0px) + 85px)"}}>
       <div key={tab} style={{animation:"fsu .25s ease both"}}>
         {tab===0&&<Home data={data} onSel={sDi}/>}
         {tab===1&&<List data={data} onSel={sDi}/>}

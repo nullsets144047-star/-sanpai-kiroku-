@@ -835,7 +835,7 @@ const Cfg = ({data,setData,toast:st}) => {
     // BOM除去・改行正規化
     let raw=ev.target.result.replace(/^\uFEFF/,"").replace(/\r\n/g,"\n").replace(/\r/g,"\n");
     // CSVを正確にパース（クォート内カンマ対応）
-    const parseCSV=(text)=>{const rows=[];let row=[],cur="",inQ=false;for(let i=0;i<text.length;i++){const c=text[i];if(inQ){if(c==='"'&&text[i+1]==='"'){cur+='"';i++;}else if(c==='"'){inQ=false;}else{cur+=c;}}else{if(c==='"'){inQ=true;}else if(c===','){row.push(cur);cur="";}else if(c==='\n'){row.push(cur);cur="";if(row.some(x=>x.trim()))rows.push(row);row=[];}else{cur+=c;}}}if(cur||row.length){row.push(cur);if(row.some(x=>x.trim()))rows.push(row);}return rows;};
+    const parseCSV=(text)=>{const rows=[];let row=[],cur="",inQ=false;for(let i=0;i<text.length;i++){const c=text[i];if(inQ){if(c==='"'&&text[i+1]==='"'){cur+='"';i++;}else if(c==='"'){inQ=false;}else{cur+=c;}}else{if(c==='"'){inQ=true;}else if(c===','){row.push(cur);cur="";}else if(c==='\n'){row.push(cur);cur="";if(row.some(x=>x.trim()))rows.push(row);row=[];}else if(c!=='\r'){cur+=c;}}}if(cur||row.length){row.push(cur);if(row.some(x=>x.trim()))rows.push(row);}return rows;};
     const rows=parseCSV(raw);
     if(rows.length<2){st("データなし","error");return;}
     const imp=[];
@@ -845,7 +845,7 @@ const Cfg = ({data,setData,toast:st}) => {
       if(!name){continue;}
       const ds=(cs[7]||"").split(/[；;]/).map(d=>d.trim()).filter(d=>d&&d.match(/\d{4}-\d{2}-\d{2}/));
       if(!ds.length){continue;}
-      if(data.find(d=>d.name===name))continue;
+      if(data.find(d=>d.id===cs[0]))continue;
       imp.push({id:G(),name,category:cs[2]||"神社",prefecture:cs[3]||"",address:cs[4]||"",lat:cs[5]?parseFloat(cs[5]):null,lng:cs[6]?parseFloat(cs[6]):null,memo:cs[9]||"",photos:[],visits:ds.map(dt=>({id:G(),date:dt,note:"",weather:"",mood:""})),createdAt:cs[10]||TD()});
     }
     if(!imp.length){st("インポートできるデータがありません","error");return;}
